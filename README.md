@@ -1,2 +1,2 @@
-# filter_hicexp_results
+# filter-hicexp-results
 Filter a normalized and compared (difference detection) hicexp object
