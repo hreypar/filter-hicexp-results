@@ -1,0 +1,13 @@
+#!/bin/bash
+#
+# USAGE:
+# bin/targets
+
+find -L data/ \
+	-type f \
+	-name "*.cycnorm.glm.Rds" \
+| sed -r \
+	-e 's#^data/#results/#' \
+	-e 's#.Rds$#.significant.Rds#' \
+| sort
+
