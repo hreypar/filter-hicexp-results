@@ -5,7 +5,7 @@
 
 find -L data/ \
 	-type f \
-	-name "*.cycnorm.glm.Rds" \
+	-name "*.Rds" \
 | sed -r \
 	-e 's#^data/#results/#' \
 	-e 's#.Rds$#.significant.Rds#' \
