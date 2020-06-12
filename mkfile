@@ -1,6 +1,6 @@
 # DESCRIPTION:
-# mk module to filter significant regions from
-# a normalized and compared hicexp object 
+# mk module to filter hicexp objects and
+# obtain significant region pairs
 #
 # USAGE:
 # Single target execution: `mk <TARGET>` where TARGET is
@@ -10,12 +10,13 @@
 #
 # AUTHOR: HRG
 #
-# Run R script to produce hicexp objects with significant regions.
+< config.mk
+# Run R script to filter significant pairs.
 #
-results/%.cycnorm.glm.significant.Rds:	data/%.cycnorm.glm.Rds
+results/%.significantpairs.Rds:	data/%.qlf.cycnorm.hicexp.Rds
 	mkdir -p `dirname $target`
-	bin/filter-hicexp.R \
-		--vanilla \
-		$prereq \
-		$target
+	bin/filter-hicexp-list.R \
+		--input $prereq \
+		--pvalue $PVAL \
+		--output $target
 
