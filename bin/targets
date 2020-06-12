@@ -5,9 +5,8 @@
 
 find -L data/ \
 	-type f \
-	-name "*.Rds" \
+	-name "*.qlf.cycnorm.hicexp.Rds" \
 | sed -r \
 	-e 's#^data/#results/#' \
-	-e 's#.Rds$#.significant.Rds#' \
-| sort
+	-e 's#.qlf.cycnorm.hicexp.Rds$#.significantpairs.Rds#'
 
