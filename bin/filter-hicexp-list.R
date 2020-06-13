@@ -12,8 +12,29 @@
 library(multiHiCcompare)
 library(optparse)
 #
-#options(scipen = 10)
+########################## functions ###################################
+# it's dangerous to go alone! take this.
 #
+# obtain significant pairs of interactions.
+obtain_sigpairs <- function(comparison, p) {
+  topDirs(hicexp = comparison, p.adj_cutoff = p, return_df = "pairedbed")
+}
+#
+# plot sigpairs by chromosome
+plot_sigpairs_chr <- function(sigpairs, p, outdir) {
+  
+  c <- sigpairs.list[[sigpairs]]$chr1
+  c <- replace(c, c=="chr23", "chrX")
+  c <- factor(c, levels = c(paste0("chr", seq(1,22,1)), "chrX"))
+  
+  png(file = paste0(outdir, "/", sigpairs, "-barplot-chrs.png"), 
+      height = 10, width = 10, units = "in", res = 300)
+  
+  barplot(rev(table(c)), horiz = TRUE, las=1, border=F)
+
+  dev.off()
+  
+}
 ########################## read in data ###################################
 option_list = list(
   make_option(opt_str = c("-i", "--input"),
@@ -27,29 +48,45 @@ option_list = list(
               type = "character",
               help = "output file")
 )
-
+#
 opt <- parse_args(OptionParser(option_list=option_list))
-
+#
 if (is.null(opt$input)){
   print_help(OptionParser(option_list=option_list))
   stop("The input file is mandatory.n", call.=FALSE)
 }
-
+#
 hicexp.comparison.list <- readRDS(opt$input)
-
+#
 ################### filter significant interactions #######################
+#
+sigpairs.list <- lapply(hicexp.comparison.list, obtain_sigpairs, p = opt$pvalue)
+#
+names(sigpairs.list) <- gsub("qlf", "sig", names(sigpairs.list))
+#
+############################# postprocessig ###############################
+# all the battery of plots.
+a <- sigpairs.list[[1]]
 
-top.qlf.MCF10AT1.MCF10A <- topDirs(qlf.MCF10AT1.MCF10A, return_df = "pairedbed", p.adj_cutoff = 0.05)
-top.qlf.MCF10CA1A.MCF10A <- topDirs(qlf.MCF10CA1A.MCF10A, return_df = "pairedbed", p.adj_cutoff = 0.05)
+# how many pairs by chromosome (you'll have to make the chromosomes a factor, should use a separate vector)
+
+# median distance and distance distribution
+
+# logFC 
+
+# distance AND logFC 
+# distanca AND logFC by CHROMOSOME (gglplot)
+
+
+# maybe a circos by chromosome? (DIFFERENT MODULE.)
+
+########### THE BETWEEN-COMPARISONS PLOTS require a different script that I can source here.
+#(perhaps this should be a different module)
+# boxplots comparing logFC and Distance between comparisons. 
 
 
 
-significant.pairs <- topDirs(hicexp = input.hicexp, 
-                                    p.adj_cutoff = opt$pvalue, 
-                                    logfc_cutoff = opt$logFC, 
-                                    D_cutoff = opt$distance,
-                                    return_df = "pairedbed")
 
 
 ################  then you save the object and that's that ################
-saveRDS(outfile, file = out_bedpe_path)
+saveRDS(sigpairs.list, file = opt$output)
