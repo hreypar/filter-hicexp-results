@@ -11,6 +11,7 @@
 # AUTHOR: HRG
 #
 < config.mk
+#
 # Run R script to filter significant pairs.
 #
 results/%.significantpairs.Rds:	data/%.qlf.cycnorm.hicexp.Rds
@@ -19,4 +20,12 @@ results/%.significantpairs.Rds:	data/%.qlf.cycnorm.hicexp.Rds
 		--input $prereq \
 		--pvalue $PVAL \
 		--output $target
+
+# Export significant pairs to csv.
+#
+export_sigpairs:V:	results/
+	find -L $prereq \
+		-type f \
+		-name "*.significantpairs.Rds" \
+		-exec bin/export-filtered-results.R {} \;
 
