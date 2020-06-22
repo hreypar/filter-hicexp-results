@@ -13,6 +13,7 @@
 #################### import libraries and set options ##################
 library(multiHiCcompare)
 library(optparse)
+library(ggplot2)
 #
 ######################### Create options ###############################
 option_list = list(
