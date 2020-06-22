@@ -15,13 +15,26 @@ args = commandArgs(trailingOnly=TRUE)
 # it's dangerous to go alone! take this.
 #
 ############### export significant pairs of interactions. ##############
-export_pairs <- function(comparison) {
+export_pairs <- function(comparison, outdir) {
+  # bring in data frame
+  outfile <- sigpairs.list[[comparison]]
   
-  write.
-  sigpairs.list[[comparison]]
+  # cast pvalue columns as numeric
+  outfile$p.value <- as.numeric(outfile$p.value)
+  outfile$p.adj <- as.numeric(outfile$p.adj)
+  
+  # obtain resolution
+  hicres <-  unique(outfile$end1 - outfile$start1) + 1
+  
+  # build name for output text file
+  outname <- paste0(outdir, "/", gsub("\\.", "_", comparison), "_", hicres, ".csv")
+  
+  # export csv
+  write.csv(x = outfile, file = outname, quote = FALSE, row.names = FALSE)
 }
 
-############################ read in data #################################
+######################### read in data #################################
 sigpairs.list <- readRDS(args[1])
 #
-############################# save ouput ##################################
+########################### export sigpairs ############################
+lapply(names(sigpairs.list), export_pairs, outdir = dirname(args[1]))
