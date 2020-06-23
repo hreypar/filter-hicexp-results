@@ -11,9 +11,8 @@
 ########################################################################
 #
 #################### import libraries and set options ##################
-suppressMessages(library(multiHiCcompare))
+library(multiHiCcompare)
 library(optparse)
-#library(ggplot2)
 #
 options(scipen = 10)
 ######################### Create options ###############################
