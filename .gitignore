@@ -13,8 +13,6 @@ references
 .Rhistory
 .RData
 
-packrat/lib*/
-
 *.DS_Store
 .AppleDouble
 .LSOverride
