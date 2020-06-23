@@ -13,6 +13,8 @@ references
 .Rhistory
 .RData
 
+packrat/lib*/
+
 *.DS_Store
 .AppleDouble
 .LSOverride
@@ -38,3 +40,4 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+packrat/lib*/
