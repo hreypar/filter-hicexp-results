@@ -3,6 +3,17 @@ PackratVersion: 0.5.0
 RVersion: 4.0.1
 Repos: CRAN=https://cran.rstudio.com/
 
+Package: getopt
+Source: CRAN
+Version: 1.20.3
+Hash: ab38d3f237d72215f5850c142293303c
+
+Package: optparse
+Source: CRAN
+Version: 1.6.6
+Hash: 730b4998cda7b49c60f1eb02945049d1
+Requires: getopt
+
 Package: packrat
 Source: CRAN
 Version: 0.5.0
