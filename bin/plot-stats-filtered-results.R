@@ -9,7 +9,7 @@
 #
 #################### import libraries and set options ##################
 #suppressMessages(library(multiHiCcompare))
-suppressMessages(library(ggplot2))
+library(ggplot2)
 #
 options(scipen = 10)
 #
