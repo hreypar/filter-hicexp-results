@@ -29,3 +29,11 @@ export_sigpairs:V:	results/
 		-name "*.significantpairs.Rds" \
 		-exec bin/export-filtered-results.R {} \;
 
+# Plot significant pairs stats.
+#
+plot_stats:V:	results/
+	find -L $prereq \
+		-type f \
+		-name "*.significantpairs.Rds" \
+		-exec bin/plot-stats-filtered-results.R {} \;
+
