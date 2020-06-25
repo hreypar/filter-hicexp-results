@@ -1,8 +1,18 @@
 # filter-hicexp-results
-Filter a normalized and compared (difference detection) hicexp object
 
+Filter hicexp object that has been both  normalized and compared (difference detection) using `multiHiCCompare`.
 
+## Module description ##
 
+## Input ##
+
+A file called `*.qlf.cycnorm.hicexp.Rds`
+
+## Output ##
+
+- One `*.significantpairs.Rds` file for each input:
+- **Plain text files in `.csv` format:**
+- **Descriptive Plots:**
 
 ### Requirements ###
 
