@@ -19,25 +19,48 @@ args = commandArgs(trailingOnly=TRUE)
 # it's dangerous to go alone! take this.
 #
 ###################### plot sigpairs by chromosome #####################
-# plot_chromosomes <- function(sigpairs, r, outdir) {
-#   # get chromosomes data
-#   chrs <- sigpairs.list[[sigpairs]]$chr1
-#   chrs <- replace(chrs, chrs=="chr23", "chrX")
-#   chrs <- factor(chrs, levels = c(paste0("chr", seq(1,22,1)), "chrX"))
-#   chrs <- droplevels(chrs)
-#   # generate file
-#   png(file = paste0(outdir, "/", sigpairs, "-barplot-chrs-", r, ".png"), 
-#       height = 10, width = 13, units = "in", res = 300)
-#   # set margins
-#   par(mar=c(5,7,5,2))
-#   # plot
-#   barplot(rev(table(chrs)), horiz = TRUE, las=1, border=F,
-#           main = paste("Differentially Interacting Regions", 
-#                        gsub("\\.", " vs ", gsub("sig.", "", sigpairs))),
-#           xlab = paste0("Number of DIRs (", r, ")" ), ylab = "Chromosome\n")
-#   
-#   dev.off()
-# }
+plot_chromosomes <- function(sigpairs, r, outdir) {
+  # get chromosomes and logFC data
+  chr.fc <- sigpairs.list[[sigpairs]][ , c("chr1", "logFC")]
+  
+  ####### prepare data
+  # remap chrX
+  chr.fc$chr1 <- replace(chr.fc$chr1, chr.fc$chr1=="chr23", "chrX")
+  # convert to factor so it looks ordered in the plot
+  chr.fc$chr1 <- factor(chr.fc$chr1, levels = c(paste0("chr", seq(1,22,1)), "chrX"))
+  chr.fc$chr1 <- droplevels(chr.fc$chr1)
+  
+  # remap logFC to a factor
+  chr.fc$logFC <- unlist(lapply(chr.fc$logFC, function(x) {
+    if(x < 0) { return("Negative")
+    } else if(x > 0) { return("Positive") }
+  }))
+  
+  # final data frame
+  t <- as.data.frame(table(chr.fc$logFC, chr.fc$chr1))
+  colnames(t) <- c("logFC", "Chromosome", "DIRs")
+  
+  t$logFC <- factor(t$logFC, levels = c("Positive", "Negative"))
+  
+  ####### prepare variables for plot
+  t.main = paste0("Differentially Interacting Regions ",
+                  gsub("\\.", " vs ", gsub("sig.", "", sigpairs)), 
+                  "\n(Hi-C resolution ", r, ")")
+
+  ####### generate file
+  png(file = paste0(outdir, "/", sigpairs, "-barplot-chrs-", r, ".png"),
+      height = 9, width = 15, units = "in", res = 300)
+  
+  ####### plot
+  chrs.plot <- ggplot(t, aes(Chromosome, DIRs, fill=logFC)) + geom_bar(stat="identity") + 
+    scale_fill_manual(values=c('#58a4b0','#EE1B49')) +
+    theme_minimal() + ggtitle(t.main) +
+    geom_text(aes(label = DIRs), position = position_stack(vjust = 0.5))
+    
+  print(chrs.plot)
+  
+  dev.off()
+}
 # #
 # ###################### plot distance distribution #########################
 # plot_distance_distribution <- function(sigpairs, r, u, outdir) {
@@ -101,24 +124,22 @@ args = commandArgs(trailingOnly=TRUE)
 sigpairs.list <- readRDS(args[1])
 #
 #################### resolution of the data ############################
-hicres = resolution(hicexp.comparison.list[[1]])
+hicres = unique(sigpairs.list[[1]]$end1 - sigpairs.list[[1]]$start1) + 1
 if(hicres >= 1000000) {
-  hicres = hicres/1000000
-  hicunit = "Mb"
+  hicunit = paste0(hicres/1000000, "Mb")
 } else {
-  hicres = hicres/1000
-  hicunit = "kb"
+  hicunit = paste0(hicres/1000, "kb")
 }
 
 ######################### produce plots #################################
 # Plot DIRs by chromosome
-lapply(names(sigpairs.list), plot_chromosomes, r = paste0(hicres, hicunit), outdir = dirname(opt$output))
+lapply(names(sigpairs.list), plot_chromosomes, r = hicunit, outdir = dirname(args[1]))
 #
 # Plot distance distribution
-lapply(names(sigpairs.list), plot_distance_distribution, r = hicres, u = hicunit, outdir= dirname(opt$output))
+#lapply(names(sigpairs.list), plot_distance_distribution, r = hicres, u = hicunit, outdir= dirname(opt$output))
 #
 # Plot distance vs logFC
-lapply(names(sigpairs.list), plot_distance_vs_logfc, r = hicres, u = hicunit, outdir= dirname(opt$output))
+#lapply(names(sigpairs.list), plot_distance_vs_logfc, r = hicres, u = hicunit, outdir= dirname(opt$output))
 
 
 # maybe a circos by chromosome? (DIFFERENT MODULE.)
