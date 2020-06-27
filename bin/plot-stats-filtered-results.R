@@ -30,7 +30,7 @@ format_chromosomes <- function(chrs) {
 }
 #
 ####################### map logFC values to factor #####################
-logfc_to_factor <- function(l) {
+logfc_to_category <- function(l) {
     if(l < 0) {
       return("Negative")
     } else if(l > 0) {
@@ -47,7 +47,7 @@ plot_chromosomes <- function(sigpairs, r, outdir) {
   # remap chr23 to chrX
   chr.fc$chr1 <- format_chromosomes(chr.fc$chr1)
   # remap logFC to a factor
-  chr.fc$logFC <- unlist(lapply(chr.fc$logFC, logfc_to_factor))
+  chr.fc$logFC <- unlist(lapply(chr.fc$logFC, logfc_to_category))
   
   # final data frame
   t <- as.data.frame(table(chr.fc$logFC, chr.fc$chr1))
@@ -77,12 +77,7 @@ plot_chromosomes <- function(sigpairs, r, outdir) {
 }
 #
 ####################### plot distance distribution #########################
-
-# PLOT BOXPLOT OF DISTANCE
-
-# PLOT BOXPLOT OF DISTANCE BY CHROMOSOME
-
-plot_distance_distribution <- function(sigpairs, r, u, outdir) {
+plot_distance_distribution <- function(sigpairs, r, outdir) {
   ####### get chromosomes, distance and logFC data
   distance.fc <- sigpairs.list[[sigpairs]][,c("chr1", "D", "logFC")]
   
@@ -90,27 +85,35 @@ plot_distance_distribution <- function(sigpairs, r, u, outdir) {
   # remap chr23 to chrX
   distance.fc$chr1 <- format_chromosomes(distance.fc$chr1)
   # remap logFC to a factor
-  distance.fc$logFC <- unlist(lapply(distance.fc$logFC, logfc_to_factor))
+  distance.fc$logFC <- unlist(lapply(distance.fc$logFC, logfc_to_category))
+  distance.fc$logFC <- factor(distance.fc$logFC, levels = c("Positive", "Negative"))
   
+  ####### prepare variables for plot
+  t.main = paste0("Distribution of Chromosomal Distance Between Differentially Interacting Regions ",
+         gsub("\\.", " vs ", gsub("sig.", "", sigpairs)),
+         "\n(Hi-C resolution ", r, ")")
   
-  
-  
-  
+  ####### plot1
   # generate file
-  png(filename = paste0(outdir, "/", sigpairs, "-hist-distance-", r, u, ".png"),
-      height = 10, width = 13, units = "in", res = 300)
+  # png(filename = paste0(outdir, "/", sigpairs, "-hist-distance-", r, u, ".png"),
+  #     height = 10, width = 13, units = "in", res = 300)
   
+  plot1 <- ggplot(distance.fc, aes(logFC, D, fill=logFC)) + 
+    geom_boxplot() + scale_fill_manual(values=c('#58a4b0','#EE1B49')) +
+    theme_minimal() + facet_wrap(~chr1, scales="free") +
+    ggtitle(t.main) + ylab("Distance (bins) between DIRs \n") + xlab("\nlog fold-change")
   
+  #dev.off()
   
-  # plot
-  hist(distance, las=1, col="gray83",
-       main = paste("Distance Between Differentially Interacting Regions\n",
-                    gsub("\\.", " vs ", gsub("sig.", "", sigpairs))),
-       xlab=paste0("Distance (", u, ") between DIRs" ))
-
+  ####### plot2
+  # generate file
+  # png(filename = paste0(outdir, "/", sigpairs, "-hist-distance-", r, u, ".png"),
+  #     height = 10, width = 13, units = "in", res = 300)
+  # 
   
+  # PLOT2 is boxplot using chr, D; coloring by logFC (no facet wrap)
   
-  dev.off()
+  #dev.off()
 }
 # #
 # ###################### plot distance vs logFC #############################
@@ -169,7 +172,7 @@ if(hicres >= 1000000) {
 lapply(names(sigpairs.list), plot_chromosomes, r = hicunit, outdir = dirname(args[1]))
 #
 # Plot distance distribution
-#lapply(names(sigpairs.list), plot_distance_distribution, r = hicres, u = hicunit, outdir= dirname(opt$output))
+#lapply(names(sigpairs.list), plot_distance_distribution, r = hicunit, outdir= dirname(args[1]))
 #
 # Plot distance vs logFC
 #lapply(names(sigpairs.list), plot_distance_vs_logfc, r = hicres, u = hicunit, outdir= dirname(opt$output))
