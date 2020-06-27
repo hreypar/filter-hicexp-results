@@ -56,7 +56,7 @@ plot_chromosomes <- function(sigpairs, r, outdir) {
     geom_bar(stat="identity", col="gray69", position=position_dodge()) + 
     scale_fill_manual(values=c('#58a4b0','#EE1B49')) +
     theme_minimal() + ggtitle(t.main) +
-    geom_text(aes(label = DIRs), vjust=1.3, position = position_dodge(0.9))
+    geom_text(aes(label = DIRs), vjust=-0.25, position = position_dodge(0.9))
     
   print(chrs.plot)
   
