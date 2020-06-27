@@ -52,10 +52,11 @@ plot_chromosomes <- function(sigpairs, r, outdir) {
       height = 9, width = 15, units = "in", res = 300)
   
   ####### plot
-  chrs.plot <- ggplot(t, aes(Chromosome, DIRs, fill=logFC)) + geom_bar(stat="identity") + 
+  chrs.plot <- ggplot(t, aes(Chromosome, DIRs, fill=logFC)) + 
+    geom_bar(stat="identity", col="gray69", position=position_dodge()) + 
     scale_fill_manual(values=c('#58a4b0','#EE1B49')) +
     theme_minimal() + ggtitle(t.main) +
-    geom_text(aes(label = DIRs), position = position_stack(vjust = 0.5))
+    geom_text(aes(label = DIRs), vjust=1.3, position = position_dodge(0.9))
     
   print(chrs.plot)
   
@@ -63,22 +64,30 @@ plot_chromosomes <- function(sigpairs, r, outdir) {
 }
 # #
 # ###################### plot distance distribution #########################
-# plot_distance_distribution <- function(sigpairs, r, u, outdir) {
-#   # get distance data
-#   distance <- sigpairs.list[[sigpairs]]$D * r
-#   # generate file
-#   png(filename = paste0(outdir, "/", sigpairs, "-hist-distance-", r, u, ".png"),
-#       height = 10, width = 13, units = "in", res = 300)
-#   # set margins
-#   par(mar=c(5,7,5,2))
-#   # plot
-#   hist(distance, las=1, col="gray83", 
-#        main = paste("Distance Between Differentially Interacting Regions\n",
-#                     gsub("\\.", " vs ", gsub("sig.", "", sigpairs))),
-#        xlab=paste0("Distance (", u, ") between DIRs" ))
-#   
-#   dev.off()
-# }
+
+# PLOT OF HISTOGRAM OF DISTANCE
+
+# PLOT OF HISTOGRAM OF DISTANCE BY CHROMOSOME
+
+ggplot(test, aes(chr1, D)) + geom_boxplot()
+
+
+plot_distance_distribution <- function(sigpairs, r, u, outdir) {
+  # get distance data
+  distance <- sigpairs.list[[sigpairs]]$D * r
+  # generate file
+  png(filename = paste0(outdir, "/", sigpairs, "-hist-distance-", r, u, ".png"),
+      height = 10, width = 13, units = "in", res = 300)
+  # set margins
+  par(mar=c(5,7,5,2))
+  # plot
+  hist(distance, las=1, col="gray83",
+       main = paste("Distance Between Differentially Interacting Regions\n",
+                    gsub("\\.", " vs ", gsub("sig.", "", sigpairs))),
+       xlab=paste0("Distance (", u, ") between DIRs" ))
+
+  dev.off()
+}
 # #
 # ###################### plot distance vs logFC #############################
 # plot_distance_vs_logfc <- function(sigpairs, r, u, outdir) {
