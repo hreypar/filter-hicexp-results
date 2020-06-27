@@ -5,6 +5,9 @@
 #######################################################################
 # Read in a list of filtered hicexp qlf-compared results and plot
 # descriptive stats.
+#
+# Importantly, bear in mind that this plots work because the data
+# corresponds to INTRAchromosomal interactions (i.e. chr1 == chr2)
 ########################################################################
 #
 #################### import libraries and set options ##################
@@ -18,23 +21,33 @@ args = commandArgs(trailingOnly=TRUE)
 ########################## functions ###################################
 # it's dangerous to go alone! take this.
 #
+####################### format chromosome names ########################
+format_chromosomes <- function(chrs) {
+  chrs <- replace(x = chrs, chrs == "chr23", "chrX")
+  chrs <- factor(chrs, levels = c(paste0("chr", seq(1,22,1)), "chrX"))
+  chrs <- droplevels(chrs)
+  return(chrs)
+}
+#
+####################### map logFC values to factor #####################
+logfc_to_factor <- function(l) {
+    if(l < 0) {
+      return("Negative")
+    } else if(l > 0) {
+    return("Positive") 
+    }
+}
+#
 ###################### plot sigpairs by chromosome #####################
 plot_chromosomes <- function(sigpairs, r, outdir) {
-  # get chromosomes and logFC data
+  ####### get chromosomes and logFC data
   chr.fc <- sigpairs.list[[sigpairs]][ , c("chr1", "logFC")]
   
   ####### prepare data
-  # remap chrX
-  chr.fc$chr1 <- replace(chr.fc$chr1, chr.fc$chr1=="chr23", "chrX")
-  # convert to factor so it looks ordered in the plot
-  chr.fc$chr1 <- factor(chr.fc$chr1, levels = c(paste0("chr", seq(1,22,1)), "chrX"))
-  chr.fc$chr1 <- droplevels(chr.fc$chr1)
-  
+  # remap chr23 to chrX
+  chr.fc$chr1 <- format_chromosomes(chr.fc$chr1)
   # remap logFC to a factor
-  chr.fc$logFC <- unlist(lapply(chr.fc$logFC, function(x) {
-    if(x < 0) { return("Negative")
-    } else if(x > 0) { return("Positive") }
-  }))
+  chr.fc$logFC <- unlist(lapply(chr.fc$logFC, logfc_to_factor))
   
   # final data frame
   t <- as.data.frame(table(chr.fc$logFC, chr.fc$chr1))
@@ -62,30 +75,41 @@ plot_chromosomes <- function(sigpairs, r, outdir) {
   
   dev.off()
 }
-# #
-# ###################### plot distance distribution #########################
+#
+####################### plot distance distribution #########################
 
-# PLOT OF HISTOGRAM OF DISTANCE
+# PLOT BOXPLOT OF DISTANCE
 
-# PLOT OF HISTOGRAM OF DISTANCE BY CHROMOSOME
-
-ggplot(test, aes(chr1, D)) + geom_boxplot()
-
+# PLOT BOXPLOT OF DISTANCE BY CHROMOSOME
 
 plot_distance_distribution <- function(sigpairs, r, u, outdir) {
-  # get distance data
-  distance <- sigpairs.list[[sigpairs]]$D * r
+  ####### get chromosomes, distance and logFC data
+  distance.fc <- sigpairs.list[[sigpairs]][,c("chr1", "D", "logFC")]
+  
+  ####### prepare data
+  # remap chr23 to chrX
+  distance.fc$chr1 <- format_chromosomes(distance.fc$chr1)
+  # remap logFC to a factor
+  distance.fc$logFC <- unlist(lapply(distance.fc$logFC, logfc_to_factor))
+  
+  
+  
+  
+  
   # generate file
   png(filename = paste0(outdir, "/", sigpairs, "-hist-distance-", r, u, ".png"),
       height = 10, width = 13, units = "in", res = 300)
-  # set margins
-  par(mar=c(5,7,5,2))
+  
+  
+  
   # plot
   hist(distance, las=1, col="gray83",
        main = paste("Distance Between Differentially Interacting Regions\n",
                     gsub("\\.", " vs ", gsub("sig.", "", sigpairs))),
        xlab=paste0("Distance (", u, ") between DIRs" ))
 
+  
+  
   dev.off()
 }
 # #
