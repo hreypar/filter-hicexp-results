@@ -68,7 +68,7 @@ plot_chromosomes <- function(sigpairs, r, outdir) {
   ####### plot
   chrs.plot <- ggplot(t, aes(Chromosome, DIRs, fill=logFC)) + 
     geom_bar(stat="identity", col="gray69", position=position_dodge()) + 
-    scale_fill_manual(values=c('#58a4b0','#EE1B49')) +
+    scale_fill_manual(values=c('#0c007a','#ff3633')) +
     theme_minimal() + ggtitle(t.main) +
     geom_text(aes(label = DIRs), vjust=-0.25, position = position_dodge(0.9))
     
@@ -101,7 +101,7 @@ plot_distance_distribution <- function(sigpairs, r, outdir) {
   
   plot1 <- ggplot(distance.fc, aes(logFC, D, fill=logFC)) + 
     geom_boxplot(outlier.shape = 20) + theme_minimal() + 
-    scale_fill_manual(values=c('#58a4b0','#EE1B49')) +
+    scale_fill_manual(values=c('#0c007a','#ff3633')) +
     facet_wrap(~chr1, scales="free") +
     ggtitle(t.main) + ylab("Distance (bins) between DIRs \n") + xlab("\nlog fold-change")
   
@@ -116,7 +116,7 @@ plot_distance_distribution <- function(sigpairs, r, outdir) {
   
   plot2 <- ggplot(distance.fc, aes(chr1, D, fill=logFC)) + 
     geom_boxplot(outlier.shape = 20) + theme_minimal() +
-    scale_fill_manual(values=c('#58a4b0','#EE1B49')) +
+    scale_fill_manual(values=c('#0c007a','#ff3633')) +
     ggtitle(t.main) + ylab("Distance (bins) between DIRs \n") + xlab("\nChromosome")  
   
   print(plot2)
