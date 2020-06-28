@@ -11,7 +11,6 @@
 ########################################################################
 #
 #################### import libraries and set options ##################
-#suppressMessages(library(multiHiCcompare))
 library(ggplot2)
 #
 options(scipen = 10)
@@ -95,27 +94,34 @@ plot_distance_distribution <- function(sigpairs, r, outdir) {
   
   ####### plot1
   # generate file
-  # png(filename = paste0(outdir, "/", sigpairs, "-hist-distance-", r, u, ".png"),
-  #     height = 10, width = 13, units = "in", res = 300)
+  png(filename = paste0(outdir, "/", sigpairs, "-boxplot-distance-by-chr-", r,".png"),
+      height = 9, width = 15, units = "in", res = 300)
   
   plot1 <- ggplot(distance.fc, aes(logFC, D, fill=logFC)) + 
-    geom_boxplot() + scale_fill_manual(values=c('#58a4b0','#EE1B49')) +
-    theme_minimal() + facet_wrap(~chr1, scales="free") +
+    geom_boxplot(outlier.shape = 20) + theme_minimal() + 
+    scale_fill_manual(values=c('#58a4b0','#EE1B49')) +
+    facet_wrap(~chr1, scales="free") +
     ggtitle(t.main) + ylab("Distance (bins) between DIRs \n") + xlab("\nlog fold-change")
   
-  #dev.off()
+  print(plot1)
+  
+  dev.off()
   
   ####### plot2
   # generate file
-  # png(filename = paste0(outdir, "/", sigpairs, "-hist-distance-", r, u, ".png"),
-  #     height = 10, width = 13, units = "in", res = 300)
-  # 
+  png(filename = paste0(outdir, "/", sigpairs, "-boxplot-distance-", r,".png"),
+      height = 9, width = 15, units = "in", res = 300)
   
-  # PLOT2 is boxplot using chr, D; coloring by logFC (no facet wrap)
+  plot2 <- ggplot(distance.fc, aes(chr1, D, fill=logFC)) + 
+    geom_boxplot(outlier.shape = 20) + theme_minimal() +
+    scale_fill_manual(values=c('#58a4b0','#EE1B49')) +
+    ggtitle(t.main) + ylab("Distance (bins) between DIRs \n") + xlab("\nChromosome")  
   
-  #dev.off()
+  print(plot2)
+  
+  dev.off()
 }
-# #
+#
 # ###################### plot distance vs logFC #############################
 # plot_distance_vs_logfc <- function(sigpairs, r, u, outdir) {
 #   # prepare data
@@ -172,7 +178,7 @@ if(hicres >= 1000000) {
 lapply(names(sigpairs.list), plot_chromosomes, r = hicunit, outdir = dirname(args[1]))
 #
 # Plot distance distribution
-#lapply(names(sigpairs.list), plot_distance_distribution, r = hicunit, outdir= dirname(args[1]))
+lapply(names(sigpairs.list), plot_distance_distribution, r = hicunit, outdir= dirname(args[1]))
 #
 # Plot distance vs logFC
 #lapply(names(sigpairs.list), plot_distance_vs_logfc, r = hicres, u = hicunit, outdir= dirname(opt$output))
