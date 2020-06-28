@@ -17,7 +17,9 @@ options(scipen = 10)
 #
 # input options
 args = commandArgs(trailingOnly=TRUE)
+########################################################################
 ########################## functions ###################################
+########################################################################
 # it's dangerous to go alone! take this.
 #
 ####################### format chromosome names ########################
@@ -123,45 +125,50 @@ plot_distance_distribution <- function(sigpairs, r, outdir) {
 }
 #
 # ###################### plot distance vs logFC #############################
-# plot_distance_vs_logfc <- function(sigpairs, r, u, outdir) {
-#   # prepare data
-#   hicpairs <- sigpairs.list[[sigpairs]]
-#   colnames(hicpairs)[colnames(hicpairs) == "chr1"] <- "chr"
-#   hicpairs$chr <- factor(hicpairs$chr, levels = c(paste0("chr", seq(1,22,1)), "chrX"))
-#   hicpairs$chr <- droplevels(hicpairs$chr)
-#   
-#   # create captions
-#   xcaption = paste0("\nDistance (", u, ")")
-#   ycaption = "logFC\n"
-#   maincaption = paste("log fold change difference between", 
-#                       gsub("\\.", " and ", gsub("sig.", "", sigpairs)),
-#                       "by distance\n")
-#   
-#   # plot distance vs logfc
-#   png(filename = paste0(outdir, "/", sigpairs, "-distance-vs-logfc-", r, u, ".png"),
-#       height = 10, width = 13, units = "in", res = 300)
-#   
-#   plot1 <- ggplot(hicpairs, aes(x=D*r, y=logFC)) + 
-#     geom_point(alpha=0.75, shape=19) +
-#     xlab(xcaption) + ylab(ycaption) + ggtitle(maincaption) +
-#     theme_minimal()
-#   
-#   print(plot1)
-#   dev.off()
-#   
-#   # plot distance vs logfc by chromosome
-#   png(filename = paste0(outdir, "/", sigpairs, "-distance-vs-logfc-by-chromosome", r, u, ".png"),
-#       height = 10, width = 13, units = "in", res = 300)
-#   
-#   plot2 <- ggplot(hicpairs, aes(x=D*r, y=logFC)) + 
-#     geom_point(alpha=0.75, shape=19) +
-#     xlab(xcaption) + ylab(ycaption) + ggtitle(maincaption) +
-#     facet_wrap(~chr)
-#   
-#   print(plot2)
-#   dev.off()
-# }
+plot_distance_vs_logfc <- function(sigpairs, r, u, outdir) {
+  # prepare data
+  distance.fc <- sigpairs.list[[sigpairs]][,c("chr1", "D", "logFC")]
+  
+  ####### prepare data
+  # remap chr23 to chrX
+  distance.fc$chr1 <- format_chromosomes(distance.fc$chr1)
+  
+  colnames(distance.fc)[colnames(distance.fc) == "chr1"] <- "chr"
+  
+  ####### prepare variables for plot
+  t.main = paste0("Differentially Interacting Regions between ",
+                      gsub("\\.", " and ", gsub("sig.", "", sigpairs)),
+                      "\nlog fold-change by distance (Hi-C resolution ", r, ")")
+
+  ####### plot1
+  # generate file
+  png(filename = paste0(outdir, "/", sigpairs, "-distance-vs-logfc-by-chr-", r, ".png"),
+      height = 9, width = 15, units = "in", res = 300)
+
+  plot1 <- ggplot(distance.fc, aes(D, logFC)) + 
+    geom_point(shape=20, alpha=0.6) + theme_minimal() +
+    geom_rug(col="steelblue",alpha=0.1, size=1.25) +
+    ggtitle(t.main) + xlab("Distance (bins)") + ylab("log fold-change")
+    
+  print(plot1)
+  dev.off()
+
+  ####### plot2
+  # generate file
+  png(filename = paste0(outdir, "/", sigpairs, "-distance-vs-logfc-", r, ".png"),
+      height = 9, width = 15, units = "in", res = 300)
+  
+  plot2 <- ggplot(distance.fc, aes(D, logFC)) + 
+    geom_point(shape=20, alpha=0.6) +  facet_wrap(~chr) + #theme_minimal() +
+    geom_rug(col="steelblue",alpha=0.1, size=1.25) +
+    ggtitle(t.main) + xlab("Distance (bins)") + ylab("log fold-change")
+
+  print(plot2)
+  dev.off()
+}
 #
+########################## MAIN CODE ###################################
+########################################################################
 ######################### read in data #################################
 sigpairs.list <- readRDS(args[1])
 #
@@ -172,7 +179,7 @@ if(hicres >= 1000000) {
 } else {
   hicunit = paste0(hicres/1000, "kb")
 }
-
+#
 ######################### produce plots #################################
 # Plot DIRs by chromosome
 lapply(names(sigpairs.list), plot_chromosomes, r = hicunit, outdir = dirname(args[1]))
@@ -181,13 +188,4 @@ lapply(names(sigpairs.list), plot_chromosomes, r = hicunit, outdir = dirname(arg
 lapply(names(sigpairs.list), plot_distance_distribution, r = hicunit, outdir= dirname(args[1]))
 #
 # Plot distance vs logFC
-#lapply(names(sigpairs.list), plot_distance_vs_logfc, r = hicres, u = hicunit, outdir= dirname(opt$output))
-
-
-# maybe a circos by chromosome? (DIFFERENT MODULE.)
-# or one of those diagrams where the chromosome's contacts are shown
-
-########### THE BETWEEN-COMPARISONS PLOTS 
-# ggplot comparing significant interactions neg and pos by chr
-# ggplots comparing logFC and Distance between comparisons. 
-
+lapply(names(sigpairs.list), plot_distance_vs_logfc, r = hicunit, outdir= dirname(args[1]))
